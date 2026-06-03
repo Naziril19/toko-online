@@ -1,0 +1,122 @@
+<%- include('../partials/header') %>
+
+<% 
+// Helper to format currency
+const formatRupiah = (num) => {
+  return new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 }).format(num);
+};
+
+// Helper for status badges
+const getStatusBadge = (status) => {
+  switch (status) {
+    case 'Menunggu Pembayaran':
+      return '<span class="badge bg-warning text-dark px-2 py-1 rounded-pill">Menunggu</span>';
+    case 'Diproses':
+      return '<span class="badge bg-info text-dark px-2 py-1 rounded-pill">Diproses</span>';
+    case 'Dikirim':
+      return '<span class="badge bg-primary text-white px-2 py-1 rounded-pill">Dikirim</span>';
+    case 'Selesai':
+      return '<span class="badge bg-success text-white px-2 py-1 rounded-pill">Selesai</span>';
+    default:
+      return `<span class="badge bg-secondary px-2 py-1 rounded-pill">${status}</span>`;
+  }
+};
+%>
+
+<div class="row g-4">
+  <!-- Sidebar -->
+  <div class="col-lg-3">
+    <%- include('../partials/admin-sidebar') %>
+  </div>
+
+  <!-- Main Content -->
+  <div class="col-lg-9">
+    <div class="row g-3 mb-4">
+      <!-- Total Products Card -->
+      <div class="col-6 col-md-3">
+        <div class="card glass-card border-0 p-3 h-100 d-flex flex-column justify-content-between">
+          <div class="d-flex align-items-center justify-content-between">
+            <span class="text-secondary small fw-bold">TOTAL PRODUK</span>
+            <i class="bi bi-box-seam text-primary fs-3"></i>
+          </div>
+          <h2 class="fw-bold mt-3 mb-0 text-primary"><%= prodCount %></h2>
+        </div>
+      </div>
+
+      <!-- Total Users Card -->
+      <div class="col-6 col-md-3">
+        <div class="card glass-card border-0 p-3 h-100 d-flex flex-column justify-content-between">
+          <div class="d-flex align-items-center justify-content-between">
+            <span class="text-secondary small fw-bold">TOTAL PENGGUNA</span>
+            <i class="bi bi-people text-primary fs-3"></i>
+          </div>
+          <h2 class="fw-bold mt-3 mb-0 text-primary"><%= userCount %></h2>
+        </div>
+      </div>
+
+      <!-- Total Orders Card -->
+      <div class="col-6 col-md-3">
+        <div class="card glass-card border-0 p-3 h-100 d-flex flex-column justify-content-between">
+          <div class="d-flex align-items-center justify-content-between">
+            <span class="text-secondary small fw-bold">TOTAL PESANAN</span>
+            <i class="bi bi-receipt text-primary fs-3"></i>
+          </div>
+          <h2 class="fw-bold mt-3 mb-0 text-primary"><%= orderCount %></h2>
+        </div>
+      </div>
+
+      <!-- Total Sales Card -->
+      <div class="col-6 col-md-3">
+        <div class="card glass-card border-0 p-3 h-100 d-flex flex-column justify-content-between">
+          <div class="d-flex align-items-center justify-content-between">
+            <span class="text-secondary small fw-bold">PENDAPATAN</span>
+            <i class="bi bi-currency-dollar text-success fs-3"></i>
+          </div>
+          <h4 class="fw-bold mt-3 mb-0 text-success text-truncate"><%= formatRupiah(totalRevenue) %></h4>
+        </div>
+      </div>
+    </div>
+
+    <!-- Recent Orders Table -->
+    <div class="card glass-card border-0 p-4">
+      <h5 class="fw-bold text-primary mb-4"><i class="bi bi-clock-history me-2"></i>Aktivitas Pesanan Terbaru</h5>
+      <% if (recentOrders.length === 0) { %>
+        <p class="text-secondary mb-0 text-center py-4">Belum ada pesanan masuk.</p>
+      <% } else { %>
+        <div class="table-responsive">
+          <table class="table align-middle">
+            <thead>
+              <tr>
+                <th scope="col" class="border-0">No. Order</th>
+                <th scope="col" class="border-0">Pelanggan</th>
+                <th scope="col" class="border-0 text-center">Total</th>
+                <th scope="col" class="border-0 text-center">Pembayaran</th>
+                <th scope="col" class="border-0 text-center">Status</th>
+                <th scope="col" class="border-0 text-center">Aksi</th>
+              </tr>
+            </thead>
+            <tbody>
+              <% recentOrders.forEach(order => { %>
+                <tr>
+                  <td><span class="fw-bold">#<%= order.id.substring(0, 8).toUpperCase() %></span></td>
+                  <td>
+                    <div class="fw-bold"><%= order.shipping_name %></div>
+                    <small class="text-muted"><%= order.users ? order.users.email : '' %></small>
+                  </td>
+                  <td class="text-center fw-bold text-primary"><%= formatRupiah(order.total_price) %></td>
+                  <td class="text-center small"><%= order.payment_method %></td>
+                  <td class="text-center"><%- getStatusBadge(order.status) %></td>
+                  <td class="text-center">
+                    <a href="/admin/orders" class="btn btn-outline-primary btn-sm rounded-pill px-3">Detail</a>
+                  </td>
+                </tr>
+              <% }) %>
+            </tbody>
+          </table>
+        </div>
+      <% } %>
+    </div>
+  </div>
+</div>
+
+<%- include('../partials/footer') %>

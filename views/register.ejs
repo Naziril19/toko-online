@@ -1,0 +1,63 @@
+<%- include('partials/header') %>
+
+<div class="row justify-content-center align-items-center py-5" style="min-height: 75vh;">
+  <div class="col-md-6 col-lg-5">
+    <div class="card glass-card p-4 border-0">
+      <div class="card-body">
+        <h2 class="fw-bold text-center text-primary mb-4">Daftar Akun</h2>
+        <p class="text-secondary text-center mb-4">Bergabunglah dengan kami untuk berbelanja berbagai perangkat elektronik terbaik.</p>
+
+        <% if (error_msg) { %>
+          <div class="alert alert-danger d-flex align-items-center rounded-3 border-0 py-3 mb-4" role="alert">
+            <i class="bi bi-exclamation-triangle-fill me-2 fs-5"></i>
+            <div><%= error_msg %></div>
+          </div>
+        <% } %>
+
+        <form action="/auth/register" method="POST">
+          <div class="mb-3">
+            <label for="full_name" class="form-label fw-semibold">Nama Lengkap</label>
+            <div class="input-group">
+              <span class="input-group-text bg-transparent border-end-0 text-secondary"><i class="bi bi-person"></i></span>
+              <input type="text" class="form-control border-start-0" id="full_name" name="full_name" placeholder="John Doe" required>
+            </div>
+          </div>
+
+          <div class="mb-3">
+            <label for="email" class="form-label fw-semibold">Alamat Email</label>
+            <div class="input-group">
+              <span class="input-group-text bg-transparent border-end-0 text-secondary"><i class="bi bi-envelope"></i></span>
+              <input type="email" class="form-control border-start-0" id="email" name="email" placeholder="johndoe@email.com" required>
+            </div>
+          </div>
+
+          <div class="mb-3">
+            <label for="phone" class="form-label fw-semibold">Nomor Telepon</label>
+            <div class="input-group">
+              <span class="input-group-text bg-transparent border-end-0 text-secondary"><i class="bi bi-telephone"></i></span>
+              <input type="tel" class="form-control border-start-0" id="phone" name="phone" placeholder="081234567890">
+            </div>
+          </div>
+
+          <div class="mb-4">
+            <label for="password" class="form-label fw-semibold">Password</label>
+            <div class="input-group">
+              <span class="input-group-text bg-transparent border-end-0 text-secondary"><i class="bi bi-lock"></i></span>
+              <input type="password" class="form-control border-start-0" id="password" name="password" placeholder="••••••••" minlength="6" required>
+            </div>
+            <div class="form-text text-muted small mt-1">Password minimal 6 karakter.</div>
+          </div>
+
+          <button type="submit" class="btn btn-primary w-100 py-3 rounded-3 mb-3">Daftar Sekarang</button>
+        </form>
+
+        <div class="text-center mt-4">
+          <span class="text-secondary">Sudah punya akun?</span> 
+          <a href="/auth/login" class="text-primary fw-semibold text-decoration-none">Masuk di sini</a>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<%- include('partials/footer') %>

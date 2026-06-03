@@ -1,0 +1,230 @@
+<%- include('../partials/header') %>
+
+<% 
+// Helper to format currency
+const formatRupiah = (num) => {
+  return new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 }).format(num);
+};
+%>
+
+<div class="row g-4">
+  <!-- Sidebar -->
+  <div class="col-lg-3">
+    <%- include('../partials/admin-sidebar') %>
+  </div>
+
+  <!-- Main Content -->
+  <div class="col-lg-9">
+    <div class="card glass-card border-0 p-4">
+      <div class="d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center gap-3 mb-4">
+        <div>
+          <h4 class="fw-bold text-primary mb-1">Manajemen Produk</h4>
+          <p class="text-secondary mb-0">Kelola informasi produk, harga, persediaan stok, dan foto produk.</p>
+        </div>
+        <button class="btn btn-primary rounded-pill px-4" data-bs-toggle="modal" data-bs-target="#addProductModal">
+          <i class="bi bi-plus-circle me-2"></i>Tambah Produk
+        </button>
+      </div>
+
+      <% if (products.length === 0) { %>
+        <p class="text-secondary text-center py-5">Belum ada produk. Silakan tambahkan produk baru.</p>
+      <% } else { %>
+        <div class="table-responsive">
+          <table class="table align-middle">
+            <thead>
+              <tr>
+                <th scope="col" style="width: 80px;">Gambar</th>
+                <th scope="col">Nama Produk</th>
+                <th scope="col">Kategori</th>
+                <th scope="col" class="text-center">Harga</th>
+                <th scope="col" class="text-center">Stok</th>
+                <th scope="col" class="text-center" style="width: 150px;">Aksi</th>
+              </tr>
+            </thead>
+            <tbody>
+              <% products.forEach(product => { %>
+                <tr>
+                  <!-- Image thumbnail -->
+                  <td>
+                    <img src="<%= product.image_url || 'https://images.unsplash.com/photo-1546868871-7041f2a55e12?q=80&w=600' %>" 
+                         alt="<%= product.name %>" 
+                         class="rounded-3" 
+                         style="width: 50px; height: 50px; object-fit: cover; border: 1px solid var(--border-color);">
+                  </td>
+                  <!-- Name & Description -->
+                  <td>
+                    <div class="fw-bold text-secondary"><%= product.name %></div>
+                    <small class="text-muted d-block text-truncate" style="max-width: 250px;"><%= product.description || 'Tidak ada deskripsi.' %></small>
+                  </td>
+                  <!-- Category -->
+                  <td>
+                    <span class="badge bg-secondary-light text-secondary"><%= product.categories ? product.categories.name : 'Tanpa Kategori' %></span>
+                  </td>
+                  <!-- Price -->
+                  <td class="text-center fw-bold text-primary"><%= formatRupiah(product.price) %></td>
+                  <!-- Stock -->
+                  <td class="text-center">
+                    <% if (product.stock > 0) { %>
+                      <span class="badge bg-success-light text-success"><%= product.stock %> Unit</span>
+                    <% } else { %>
+                      <span class="badge bg-danger-light text-danger">Habis</span>
+                    <% } %>
+                  </td>
+                  <!-- Actions -->
+                  <td class="text-center">
+                    <div class="d-flex justify-content-center gap-2">
+                      <!-- Edit Button -->
+                      <button class="btn btn-outline-primary btn-sm rounded-circle p-2" 
+                              data-bs-toggle="modal" 
+                              data-bs-target="#editProductModal" 
+                              onclick="populateEditModal('<%= product.id %>', '<%= product.name %>', '<%= product.category_id || \'\' %>', '<%= product.price %>', '<%= product.stock %>', '<%= product.description || \'\' %>')" 
+                              title="Edit Produk">
+                        <i class="bi bi-pencil"></i>
+                      </button>
+                      
+                      <!-- Delete Button -->
+                      <button class="btn btn-outline-danger btn-sm rounded-circle p-2" 
+                              onclick="deleteProduct('<%= product.id %>')" 
+                              title="Hapus Produk">
+                        <i class="bi bi-trash"></i>
+                      </button>
+
+                      <form id="delete-form-<%= product.id %>" action="/admin/products/delete/<%= product.id %>" method="POST" style="display:none;"></form>
+                    </div>
+                  </td>
+                </tr>
+              <% }) %>
+            </tbody>
+          </table>
+        </div>
+      <% } %>
+    </div>
+  </div>
+</div>
+
+<!-- Modal: Add Product -->
+<div class="modal fade" id="addProductModal" tabindex="-1" aria-labelledby="addProductLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered modal-lg">
+    <div class="modal-content glass-card border-0">
+      <div class="modal-header border-bottom">
+        <h5 class="modal-title fw-bold text-primary" id="addProductLabel">Tambah Produk Baru</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <form action="/admin/products/add" method="POST" enctype="multipart/form-data" onsubmit="showLoading()">
+        <div class="modal-body">
+          <div class="row g-3">
+            <div class="col-md-6">
+              <label for="name" class="form-label fw-semibold">Nama Produk</label>
+              <input type="text" class="form-control" name="name" required placeholder="iPhone 15 Pro, Asus ROG, dll">
+            </div>
+            <div class="col-md-6">
+              <label for="category_id" class="form-label fw-semibold">Kategori</label>
+              <select class="form-select" name="category_id">
+                <option value="">Pilih Kategori</option>
+                <% categories.forEach(cat => { %>
+                  <option value="<%= cat.id %>"><%= cat.name %></option>
+                <% }) %>
+              </select>
+            </div>
+            <div class="col-md-6">
+              <label for="price" class="form-label fw-semibold">Harga (Rupiah)</label>
+              <input type="number" class="form-control" name="price" required placeholder="Contoh: 15000000" min="0">
+            </div>
+            <div class="col-md-6">
+              <label for="stock" class="form-label fw-semibold">Jumlah Stok</label>
+              <input type="number" class="form-control" name="stock" required placeholder="Contoh: 10" min="0">
+            </div>
+            <div class="col-12">
+              <label for="image" class="form-label fw-semibold">Gambar Produk</label>
+              <input type="file" class="form-control" name="image" accept="image/*">
+              <div class="form-text text-muted small mt-1">Format file: JPG, PNG, GIF. Maksimal 5MB.</div>
+            </div>
+            <div class="col-12">
+              <label for="description" class="form-label fw-semibold">Deskripsi Produk</label>
+              <textarea class="form-control" name="description" rows="4" placeholder="Tulis deskripsi detail produk di sini..."></textarea>
+            </div>
+          </div>
+        </div>
+        <div class="modal-footer border-top">
+          <button type="button" class="btn btn-outline-secondary rounded-pill px-4" data-bs-dismiss="modal">Batal</button>
+          <button type="submit" class="btn btn-primary rounded-pill px-4">Simpan Produk</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+<!-- Modal: Edit Product -->
+<div class="modal fade" id="editProductModal" tabindex="-1" aria-labelledby="editProductLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered modal-lg">
+    <div class="modal-content glass-card border-0">
+      <div class="modal-header border-bottom">
+        <h5 class="modal-title fw-bold text-primary" id="editProductLabel">Edit Produk</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <form id="editProductForm" method="POST" enctype="multipart/form-data" onsubmit="showLoading()">
+        <div class="modal-body">
+          <div class="row g-3">
+            <div class="col-md-6">
+              <label for="edit-name" class="form-label fw-semibold">Nama Produk</label>
+              <input type="text" class="form-control" id="edit-name" name="name" required>
+            </div>
+            <div class="col-md-6">
+              <label for="edit-category_id" class="form-label fw-semibold">Kategori</label>
+              <select class="form-select" id="edit-category_id" name="category_id">
+                <option value="">Pilih Kategori</option>
+                <% categories.forEach(cat => { %>
+                  <option value="<%= cat.id %>"><%= cat.name %></option>
+                <% }) %>
+              </select>
+            </div>
+            <div class="col-md-6">
+              <label for="edit-price" class="form-label fw-semibold">Harga (Rupiah)</label>
+              <input type="number" class="form-control" id="edit-price" name="price" required min="0">
+            </div>
+            <div class="col-md-6">
+              <label for="edit-stock" class="form-label fw-semibold">Jumlah Stok</label>
+              <input type="number" class="form-control" id="edit-stock" name="stock" required min="0">
+            </div>
+            <div class="col-12">
+              <label for="edit-image" class="form-label fw-semibold">Ganti Gambar Produk (Opsional)</label>
+              <input type="file" class="form-control" id="edit-image" name="image" accept="image/*">
+            </div>
+            <div class="col-12">
+              <label for="edit-description" class="form-label fw-semibold">Deskripsi Produk</label>
+              <textarea class="form-control" id="edit-description" name="description" rows="4"></textarea>
+            </div>
+          </div>
+        </div>
+        <div class="modal-footer border-top">
+          <button type="button" class="btn btn-outline-secondary rounded-pill px-4" data-bs-dismiss="modal">Batal</button>
+          <button type="submit" class="btn btn-primary rounded-pill px-4">Perbarui</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+<script>
+  function populateEditModal(id, name, categoryId, price, stock, description) {
+    document.getElementById('editProductForm').action = `/admin/products/edit/${id}`;
+    document.getElementById('edit-name').value = name;
+    document.getElementById('edit-category_id').value = categoryId;
+    document.getElementById('edit-price').value = price;
+    document.getElementById('edit-stock').value = stock;
+    document.getElementById('edit-description').value = description;
+  }
+
+  function deleteProduct(id) {
+    confirmDelete(
+      'Hapus Produk?',
+      'Apakah Anda yakin ingin menghapus produk ini dari katalog toko Anda?',
+      () => {
+        showLoading();
+        document.getElementById(`delete-form-${id}`).submit();
+      }
+    );
+  }
+</script>
+
+<%- include('../partials/footer') %>

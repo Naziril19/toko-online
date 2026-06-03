@@ -1,0 +1,56 @@
+<%- include('partials/header') %>
+
+<div class="row justify-content-center align-items-center py-5" style="min-height: 75vh;">
+  <div class="col-md-6 col-lg-5">
+    <div class="card glass-card p-4 border-0">
+      <div class="card-body">
+        <h2 class="fw-bold text-center text-primary mb-4">Masuk Akun</h2>
+        <p class="text-secondary text-center mb-4">Masuk untuk mengelola pesanan dan mulai membeli elektronik premium.</p>
+
+        <% if (error_msg) { %>
+          <div class="alert alert-danger d-flex align-items-center rounded-3 border-0 py-3 mb-4" role="alert">
+            <i class="bi bi-exclamation-triangle-fill me-2 fs-5"></i>
+            <div><%= error_msg %></div>
+          </div>
+        <% } %>
+
+        <% if (success_msg) { %>
+          <div class="alert alert-success d-flex align-items-center rounded-3 border-0 py-3 mb-4" role="alert">
+            <i class="bi bi-check-circle-fill me-2 fs-5"></i>
+            <div><%= success_msg %></div>
+          </div>
+        <% } %>
+
+        <form action="/auth/login" method="POST">
+          <div class="mb-3">
+            <label for="email" class="form-label fw-semibold">Alamat Email</label>
+            <div class="input-group">
+              <span class="input-group-text bg-transparent border-end-0 text-secondary"><i class="bi bi-envelope"></i></span>
+              <input type="email" class="form-control border-start-0" id="email" name="email" placeholder="johndoe@email.com" required>
+            </div>
+          </div>
+
+          <div class="mb-3">
+            <div class="d-flex justify-content-between mb-1">
+              <label for="password" class="form-label fw-semibold mb-0">Password</label>
+              <a href="/auth/forgot-password" class="small text-primary text-decoration-none">Lupa Password?</a>
+            </div>
+            <div class="input-group">
+              <span class="input-group-text bg-transparent border-end-0 text-secondary"><i class="bi bi-lock"></i></span>
+              <input type="password" class="form-control border-start-0" id="password" name="password" placeholder="••••••••" required>
+            </div>
+          </div>
+
+          <button type="submit" class="btn btn-primary w-100 py-3 rounded-3 mb-3 mt-3">Masuk</button>
+        </form>
+
+        <div class="text-center mt-4">
+          <span class="text-secondary">Belum punya akun?</span> 
+          <a href="/auth/register" class="text-primary fw-semibold text-decoration-none">Daftar sekarang</a>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<%- include('partials/footer') %>

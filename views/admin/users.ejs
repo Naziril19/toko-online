@@ -1,0 +1,107 @@
+<%- include('../partials/header') %>
+
+<div class="row g-4">
+  <!-- Sidebar -->
+  <div class="col-lg-3">
+    <%- include('../partials/admin-sidebar') %>
+  </div>
+
+  <!-- Main Content -->
+  <div class="col-lg-9">
+    <div class="card glass-card border-0 p-4">
+      <h4 class="fw-bold text-primary mb-1">Manajemen Pengguna</h4>
+      <p class="text-secondary mb-4">Ubah role pengguna (Admin / Customer) dan hapus akun pengguna yang tidak aktif.</p>
+
+      <% if (users.length === 0) { %>
+        <p class="text-secondary text-center py-5">Belum ada pengguna terdaftar.</p>
+      <% } else { %>
+        <div class="table-responsive">
+          <table class="table align-middle">
+            <thead>
+              <tr>
+                <th scope="col">Nama Lengkap</th>
+                <th scope="col">Email</th>
+                <th scope="col">Nomor HP</th>
+                <th scope="col" class="text-center">Tanggal Daftar</th>
+                <th scope="col" class="text-center">Role</th>
+                <th scope="col" class="text-center" style="width: 150px;">Aksi</th>
+              </tr>
+            </thead>
+            <tbody>
+              <% users.forEach(usr => { %>
+                <tr>
+                  <!-- Name -->
+                  <td class="fw-bold text-secondary">
+                    <%= usr.full_name %>
+                    <% if (usr.id === user.id) { %>
+                      <span class="badge bg-secondary-light text-secondary ms-1 small" style="font-size: 0.65rem;">Anda</span>
+                    <% } %>
+                  </td>
+                  <!-- Email -->
+                  <td class="text-secondary small"><%= usr.email %></td>
+                  <!-- Phone -->
+                  <td class="text-secondary small"><%= usr.phone || '-' %></td>
+                  <!-- Signup Date -->
+                  <td class="text-center small text-secondary">
+                    <%= new Date(usr.created_at).toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric' }) %>
+                  </td>
+                  <!-- Role -->
+                  <td class="text-center">
+                    <% if (usr.role === 'admin') { %>
+                      <span class="badge bg-danger-light text-danger"><i class="bi bi-shield-fill-check me-1"></i>Admin</span>
+                    <% } else { %>
+                      <span class="badge bg-primary-light text-primary"><i class="bi bi-person-fill me-1"></i>Customer</span>
+                    <% } %>
+                  </td>
+                  <!-- Action (Disable modifying self role for safety) -->
+                  <td class="text-center">
+                    <% if (usr.id !== user.id) { %>
+                      <div class="d-flex justify-content-center gap-2">
+                        <!-- Toggle Role Form -->
+                        <form action="/admin/users/role/<%= usr.id %>" method="POST">
+                          <input type="hidden" name="role" value="<%= usr.role === 'admin' ? 'customer' : 'admin' %>">
+                          <button type="submit" 
+                                  class="btn btn-outline-primary btn-sm rounded-circle p-2" 
+                                  title="Ubah Role ke <%= usr.role === 'admin' ? 'Customer' : 'Admin' %>"
+                                  onclick="showLoading()">
+                            <i class="bi bi-arrow-left-right"></i>
+                          </button>
+                        </form>
+                        
+                        <!-- Delete User Form -->
+                        <button class="btn btn-outline-danger btn-sm rounded-circle p-2" 
+                                onclick="deleteUserAccount('<%= usr.id %>')" 
+                                title="Hapus Pengguna">
+                          <i class="bi bi-trash"></i>
+                        </button>
+                        
+                        <form id="delete-user-form-<%= usr.id %>" action="/admin/users/delete/<%= usr.id %>" method="POST" style="display:none;"></form>
+                      </div>
+                    <% } else { %>
+                      <span class="text-muted small">-</span>
+                    <% } %>
+                  </td>
+                </tr>
+              <% }) %>
+            </tbody>
+          </table>
+        </div>
+      <% } %>
+    </div>
+  </div>
+</div>
+
+<script>
+  function deleteUserAccount(id) {
+    confirmDelete(
+      'Hapus Akun Pengguna?',
+      'Akun ini akan dihapus secara permanen dari basis data otentikasi Supabase beserta seluruh keranjang belanjanya!',
+      () => {
+        showLoading();
+        document.getElementById(`delete-user-form-${id}`).submit();
+      }
+    );
+  }
+</script>
+
+<%- include('../partials/footer') %>

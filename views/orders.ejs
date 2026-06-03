@@ -1,0 +1,160 @@
+<%- include('partials/header') %>
+
+<% 
+// Helper to format currency
+const formatRupiah = (num) => {
+  return new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 }).format(num);
+};
+
+// Helper for status badges
+const getStatusBadge = (status) => {
+  switch (status) {
+    case 'Menunggu Pembayaran':
+      return '<span class="badge bg-warning text-dark px-3 py-2 rounded-pill"><i class="bi bi-clock me-1"></i>Menunggu Pembayaran</span>';
+    case 'Diproses':
+      return '<span class="badge bg-info text-dark px-3 py-2 rounded-pill"><i class="bi bi-gear-fill me-1"></i>Diproses</span>';
+    case 'Dikirim':
+      return '<span class="badge bg-primary text-white px-3 py-2 rounded-pill"><i class="bi bi-truck me-1"></i>Dikirim</span>';
+    case 'Selesai':
+      return '<span class="badge bg-success text-white px-3 py-2 rounded-pill"><i class="bi bi-check-circle-fill me-1"></i>Selesai</span>';
+    default:
+      return `<span class="badge bg-secondary px-3 py-2 rounded-pill">${status}</span>`;
+  }
+};
+
+// Helper for readable date
+const formatDate = (dateStr) => {
+  const date = new Date(dateStr);
+  return date.toLocaleDateString('id-ID', {
+    day: 'numeric',
+    month: 'long',
+    year: 'numeric',
+    hour: '2-digit',
+    minute: '2-digit'
+  });
+};
+%>
+
+<div class="row">
+  <div class="col-12 mb-4">
+    <nav aria-label="breadcrumb">
+      <ol class="breadcrumb">
+        <li class="breadcrumb-item"><a href="/" class="text-decoration-none text-primary">Home</a></li>
+        <li class="breadcrumb-item active" aria-current="page">Riwayat Pesanan</li>
+      </ol>
+    </nav>
+    <h1 class="fw-bold mb-1">Riwayat Pesanan</h1>
+    <p class="text-secondary">Pantau status pengiriman dan riwayat belanja Anda di sini.</p>
+  </div>
+</div>
+
+<% if (orders.length === 0) { %>
+  <div class="row justify-content-center py-5">
+    <div class="col-md-6 text-center">
+      <div class="card glass-card border-0 p-5 shadow-lg">
+        <i class="bi bi-receipt-cutoff text-muted" style="font-size: 5rem;"></i>
+        <h3 class="fw-bold mt-4">Belum Ada Pesanan</h3>
+        <p class="text-secondary mb-4">Anda belum pernah melakukan pemesanan produk di toko online kami.</p>
+        <a href="/products" class="btn btn-primary rounded-pill px-5 py-3 fw-bold">Belanja Sekarang <i class="bi bi-cart ms-2"></i></a>
+      </div>
+    </div>
+  </div>
+<% } else { %>
+  <div class="row">
+    <div class="col-lg-10 mx-auto">
+      <div class="d-flex flex-column gap-4">
+        <% orders.forEach(order => { %>
+          <div class="card glass-card border-0 overflow-hidden shadow-sm">
+            <!-- Order Header -->
+            <div class="card-header bg-light border-bottom p-4 d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center gap-3">
+              <div>
+                <div class="text-muted small fw-semibold">NOMOR ORDER</div>
+                <div class="fw-bold text-primary mb-1">#<%= order.id.substring(0, 8).toUpperCase() %>...</div>
+                <div class="text-secondary small"><i class="bi bi-calendar-event me-1"></i><%= formatDate(order.created_at) %></div>
+              </div>
+              <div class="text-md-end">
+                <div class="text-muted small fw-semibold">METODE PEMBAYARAN</div>
+                <div class="fw-bold text-secondary mb-1"><%= order.payment_method %></div>
+              </div>
+              <div>
+                <%- getStatusBadge(order.status) %>
+              </div>
+            </div>
+
+            <!-- Order Body -->
+            <div class="card-body p-4">
+              <div class="row g-4">
+                <!-- Items list -->
+                <div class="col-md-7 border-md-end">
+                  <h6 class="fw-bold text-primary mb-3">Item Pesanan</h6>
+                  <div class="d-flex flex-column gap-3">
+                    <% order.order_items.forEach(item => { %>
+                      <div class="d-flex align-items-center justify-content-between">
+                        <div class="d-flex align-items-center">
+                          <img src="<%= item.products ? item.products.image_url : 'https://images.unsplash.com/photo-1546868871-7041f2a55e12?q=80&w=600' %>" alt="<%= item.products ? item.products.name : 'Produk' %>" class="rounded-2 me-3" style="width: 60px; height: 60px; object-fit: cover; border: 1px solid var(--border-color);">
+                          <div>
+                            <h6 class="fw-bold mb-1" style="font-size: 0.95rem;"><%= item.products ? item.products.name : 'Produk Tidak Tersedia' %></h6>
+                            <span class="text-secondary small"><%= item.quantity %> x <%= formatRupiah(item.price) %></span>
+                          </div>
+                        </div>
+                        <span class="fw-bold text-secondary"><%= formatRupiah(item.price * item.quantity) %></span>
+                      </div>
+                    <% }) %>
+                  </div>
+                </div>
+
+                <!-- Shipping Address and Instructions -->
+                <div class="col-md-5">
+                  <h6 class="fw-bold text-primary mb-3">Detail Pengiriman</h6>
+                  <div class="mb-3">
+                    <div class="fw-bold text-secondary mb-1"><%= order.shipping_name %></div>
+                    <div class="text-secondary small mb-1"><i class="bi bi-telephone me-1"></i><%= order.shipping_phone %></div>
+                    <div class="text-secondary small leading-relaxed"><i class="bi bi-geo-alt me-1"></i><%= order.shipping_address %></div>
+                  </div>
+
+                  <!-- Dynamic Payment instructions -->
+                  <% if (order.status === 'Menunggu Pembayaran') { %>
+                    <div class="card border-warning-subtle bg-warning-subtle text-warning-emphasis p-3 rounded-3 mt-3">
+                      <h6 class="fw-bold mb-2 small"><i class="bi bi-exclamation-circle-fill me-1"></i>Instruksi Pembayaran:</h6>
+                      <% if (order.payment_method === 'Transfer Bank') { %>
+                        <p class="small mb-0 leading-relaxed">
+                          Silakan transfer total pembayaran sebesar <strong><%= formatRupiah(order.total_price) %></strong> ke:<br>
+                          <strong>Bank BCA 123-456-7890</strong><br>
+                          a/n <strong>PT ElectroTech Indonesia</strong>.<br>
+                          Pesanan akan diproses otomatis setelah verifikasi.
+                        </p>
+                      <% } else if (order.payment_method === 'E-Wallet') { %>
+                        <p class="small mb-0 leading-relaxed">
+                          Silakan transfer ke E-Wallet GoPay/OVO/Dana sebesar <strong><%= formatRupiah(order.total_price) %></strong> ke nomor:<br>
+                          <strong>0812-3456-7890</strong><br>
+                          Sertakan nomor order di catatan transfer Anda.
+                        </p>
+                      <% } else { %>
+                        <p class="small mb-0 leading-relaxed">
+                          Pembayaran <strong>COD (Cash on Delivery)</strong>. Harap siapkan uang tunai pas sebesar <strong><%= formatRupiah(order.total_price) %></strong> untuk diserahkan ke kurir saat barang tiba.
+                        </p>
+                      <% } %>
+                    </div>
+                  <% } %>
+                </div>
+              </div>
+            </div>
+
+            <!-- Order Footer -->
+            <div class="card-footer bg-transparent border-top p-4 d-flex justify-content-between align-items-center">
+              <div>
+                <span class="text-secondary small">Total Pembayaran</span>
+                <h4 class="fw-bold text-primary mb-0 mt-1"><%= formatRupiah(order.total_price) %></h4>
+              </div>
+              <div>
+                <a href="/products" class="btn btn-outline-primary btn-sm rounded-pill px-4">Belanja Lagi</a>
+              </div>
+            </div>
+          </div>
+        <% }) %>
+      </div>
+    </div>
+  </div>
+<% } %>
+
+<%- include('partials/footer') %>

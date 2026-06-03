@@ -1,0 +1,204 @@
+<%- include('partials/header') %>
+
+<% 
+// Helper to format currency
+const formatRupiah = (num) => {
+  return new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 }).format(num);
+};
+%>
+
+<!-- Hero Section -->
+<div class="hero-gradient d-flex align-items-center text-white mb-5 rounded-4 py-5 px-4 px-md-5">
+  <div class="row w-100 align-items-center g-4">
+    <div class="col-lg-6">
+      <span class="badge bg-white text-primary px-3 py-2 rounded-pill fw-bold mb-3">Teknologi Terbaru & Terlengkap</span>
+      <h1 class="display-4 fw-extrabold mb-3 text-white leading-tight">Masa Depan Perangkat Elektronik</h1>
+      <p class="fs-5 text-white-50 mb-4 leading-relaxed">ElectroTech menyediakan laptop, smartphone, dan aksesoris elektronik berkualitas tinggi dengan garansi resmi dan pengiriman gratis seluruh Indonesia.</p>
+      <div class="d-flex flex-wrap gap-3">
+        <a href="/products" class="btn btn-light btn-lg text-primary fw-bold rounded-pill px-4 py-3 shadow">Belanja Sekarang <i class="bi bi-arrow-right ms-2"></i></a>
+        <a href="#kategori" class="btn btn-outline-light btn-lg fw-bold rounded-pill px-4 py-3">Lihat Kategori</a>
+      </div>
+    </div>
+    <div class="col-lg-6 text-center d-none d-lg-block">
+      <!-- Generated premium aesthetic devices mock image from Unsplash -->
+      <img src="https://images.unsplash.com/photo-1542751371-adc38448a05e?q=80&w=700" alt="Devices Mockup" class="img-fluid rounded-4 shadow-lg border border-light-subtle" style="max-height: 380px; object-fit: cover;">
+    </div>
+  </div>
+</div>
+
+<!-- Promo Banner Section -->
+<div class="row mb-5">
+  <div class="col-12">
+    <div class="card glass-card border-0 overflow-hidden shadow-sm p-4 bg-primary text-white" style="background: linear-gradient(135deg, #1E3A8A 0%, #2563EB 100%);">
+      <div class="row align-items-center g-3">
+        <div class="col-md-8">
+          <h3 class="fw-bold mb-2 text-white"><i class="bi bi-tag-fill text-warning me-2"></i>Promo Spesial Hari Ini!</h3>
+          <p class="mb-0 text-white-50 leading-relaxed">Gunakan kode voucher <strong>ELECTROTECH20</strong> untuk mendapatkan potongan harga 20% khusus pengguna baru. Kuota terbatas!</p>
+        </div>
+        <div class="col-md-4 text-md-end">
+          <button class="btn btn-warning fw-bold rounded-pill px-4 py-3 text-dark shadow" onclick="copyVoucher()">Salin Voucher</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Categories Badges -->
+<div class="mb-5" id="kategori">
+  <h3 class="fw-bold text-primary mb-4"><i class="bi bi-tags-fill me-2"></i>Kategori Populer</h3>
+  <div class="row g-3">
+    <% if (categories.length === 0) { %>
+      <div class="col-12 text-secondary small">Kategori belum tersedia.</div>
+    <% } else { %>
+      <% categories.forEach(cat => { %>
+        <div class="col-6 col-md-3">
+          <a href="/products?category=<%= cat.id %>" class="text-decoration-none">
+            <div class="card glass-card border-0 p-4 text-center h-100 product-card">
+              <i class="bi bi-cpu text-primary fs-2 mb-2"></i>
+              <h6 class="fw-bold text-secondary mb-0"><%= cat.name %></h6>
+            </div>
+          </a>
+        </div>
+      <% }) %>
+    <% } %>
+  </div>
+</div>
+
+<!-- Latest Products -->
+<div class="mb-5">
+  <div class="d-flex justify-content-between align-items-center mb-4">
+    <h3 class="fw-bold text-primary mb-0"><i class="bi bi-box-seam-fill me-2"></i>Produk Terbaru</h3>
+    <a href="/products" class="text-decoration-none text-primary fw-semibold">Lihat Semua <i class="bi bi-arrow-right"></i></a>
+  </div>
+  
+  <div class="row g-4">
+    <% if (latestProducts.length === 0) { %>
+      <div class="col-12 text-center py-4">
+        <p class="text-secondary">Produk belum tersedia di toko.</p>
+      </div>
+    <% } else { %>
+      <% latestProducts.forEach(product => { %>
+        <div class="col-12 col-md-6 col-lg-4">
+          <div class="card glass-card product-card">
+            <div class="product-image-wrapper">
+              <% if (product.stock === 0) { %>
+                <span class="badge bg-dark text-white position-absolute top-0 end-0 m-3 z-3">Habis</span>
+              <% } %>
+              <img src="<%= product.image_url || 'https://images.unsplash.com/photo-1546868871-7041f2a55e12?q=80&w=600' %>" alt="<%= product.name %>">
+            </div>
+            <div class="card-body d-flex flex-column p-4">
+              <span class="text-muted small fw-bold text-uppercase mb-1"><%= product.categories?.name || 'Elektronik' %></span>
+              <h5 class="card-title fw-bold mb-2">
+                <a href="/products/<%= product.id %>" class="text-decoration-none text-primary hover-accent"><%= product.name %></a>
+              </h5>
+              <p class="card-text text-secondary small flex-grow-1"><%= product.description ? product.description.substring(0, 80) + '...' : 'Tidak ada deskripsi.' %></p>
+              <div class="d-flex justify-content-between align-items-center mt-3">
+                <span class="fs-5 fw-bold text-primary"><%= formatRupiah(product.price) %></span>
+                <% if (product.stock > 0) { %>
+                  <button class="btn btn-primary btn-sm rounded-3 px-3" onclick="addToCart('<%= product.id %>', 1)">
+                    <i class="bi bi-cart-plus me-1"></i> Beli
+                  </button>
+                <% } else { %>
+                  <button class="btn btn-secondary btn-sm rounded-3 px-3" disabled>Habis</button>
+                <% } %>
+              </div>
+            </div>
+          </div>
+        </div>
+      <% }) %>
+    <% } %>
+  </div>
+</div>
+
+<!-- Best Seller Section -->
+<div class="row g-4 align-items-center mb-5 py-5 border-top border-bottom border-light-subtle">
+  <div class="col-lg-4">
+    <span class="badge bg-primary-light text-primary px-3 py-2 rounded-pill fw-bold mb-3">Rekomendasi Utama</span>
+    <h2 class="fw-extrabold text-primary mb-3">Produk Terlaris Minggu Ini</h2>
+    <p class="text-secondary leading-relaxed mb-4">Daftar produk paling dicari oleh konsumen dengan performa terbaik dan ulasan memuaskan.</p>
+    <a href="/products?sort=stock" class="btn btn-outline-primary rounded-pill px-4 py-2">Lihat Selengkapnya</a>
+  </div>
+  <div class="col-lg-8">
+    <div class="row g-3">
+      <% if (bestSellerProducts.length === 0) { %>
+        <div class="col-12 text-secondary">Belum ada data produk terlaris.</div>
+      <% } else { %>
+        <% bestSellerProducts.forEach(product => { %>
+          <div class="col-md-4">
+            <div class="card glass-card h-100 text-center p-3 product-card">
+              <div class="rounded-3 overflow-hidden mb-3" style="height: 120px; background-color: #f8fafc;">
+                <img src="<%= product.image_url || 'https://images.unsplash.com/photo-1546868871-7041f2a55e12?q=80&w=600' %>" alt="<%= product.name %>" class="img-fluid h-100 object-fit-cover">
+              </div>
+              <h6 class="fw-bold text-secondary mb-2 text-truncate"><%= product.name %></h6>
+              <div class="text-primary fw-bold small mb-2"><%= formatRupiah(product.price) %></div>
+              <a href="/products/<%= product.id %>" class="btn btn-primary btn-sm rounded-pill w-100 py-2">Detail</a>
+            </div>
+          </div>
+        <% }) %>
+      <% } %>
+    </div>
+  </div>
+</div>
+
+<!-- Testimonials Section -->
+<div class="mb-5">
+  <h3 class="fw-bold text-primary text-center mb-2">Testimoni Pelanggan</h3>
+  <p class="text-secondary text-center mb-5">Apa kata mereka yang telah berbelanja perangkat elektronik di ElectroTech?</p>
+  
+  <div class="row g-4">
+    <div class="col-md-4">
+      <div class="card glass-card border-0 p-4 text-center h-100">
+        <div class="d-flex justify-content-center text-warning mb-3">
+          <i class="bi bi-star-fill"></i>
+          <i class="bi bi-star-fill"></i>
+          <i class="bi bi-star-fill"></i>
+          <i class="bi bi-star-fill"></i>
+          <i class="bi bi-star-fill"></i>
+        </div>
+        <p class="text-secondary small leading-relaxed mb-4">"Belanja laptop Asus ROG di sini pelayanannya cepat banget. Transfer jam 10 pagi, jam 4 sore barang sudah sampai di rumah via Grab. Packing aman tebal wrap."</p>
+        <h6 class="fw-bold mb-1">Rian Wijaya</h6>
+        <small class="text-muted">Pembeli Asus ROG Strix</small>
+      </div>
+    </div>
+    <div class="col-md-4">
+      <div class="card glass-card border-0 p-4 text-center h-100">
+        <div class="d-flex justify-content-center text-warning mb-3">
+          <i class="bi bi-star-fill"></i>
+          <i class="bi bi-star-fill"></i>
+          <i class="bi bi-star-fill"></i>
+          <i class="bi bi-star-fill"></i>
+          <i class="bi bi-star-fill"></i>
+        </div>
+        <p class="text-secondary small leading-relaxed mb-4">"Adminnya ramah banget nanya-nanya garansi dijawab lengkap. Produk iPhone 15 Pro Original 100% iBox, IMEI terdaftar resmi. Sukses terus ElectroTech!"</p>
+        <h6 class="fw-bold mb-1">Citra Lestari</h6>
+        <small class="text-muted">Pembeli iPhone 15 Pro</small>
+      </div>
+    </div>
+    <div class="col-md-4">
+      <div class="card glass-card border-0 p-4 text-center h-100">
+        <div class="d-flex justify-content-center text-warning mb-3">
+          <i class="bi bi-star-fill"></i>
+          <i class="bi bi-star-fill"></i>
+          <i class="bi bi-star-fill"></i>
+          <i class="bi bi-star-fill"></i>
+          <i class="bi bi-star-fill"></i>
+        </div>
+        <p class="text-secondary small leading-relaxed mb-4">"Nyari aksesoris keyboard mechanical murah tapi kualitas top akhirnya nemu di sini. Dapet potongan harga diskon voucher 20% pula. Mantap sekali."</p>
+        <h6 class="fw-bold mb-1">Budi Setiawan</h6>
+        <small class="text-muted">Pembeli Mechanical Keyboard</small>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  function copyVoucher() {
+    navigator.clipboard.writeText('ELECTROTECH20').then(() => {
+      showToast('Kode voucher berhasil disalin!', 'success');
+    }).catch(err => {
+      console.error(err);
+    });
+  }
+</script>
+
+<%- include('partials/footer') %>

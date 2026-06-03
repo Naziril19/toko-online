@@ -1,0 +1,203 @@
+<%- include('partials/header') %>
+
+<% 
+// Helper to format currency
+const formatRupiah = (num) => {
+  return new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 }).format(num);
+};
+%>
+
+<div class="row">
+  <!-- Breadcrumb -->
+  <div class="col-12 mb-4">
+    <nav aria-label="breadcrumb">
+      <ol class="breadcrumb">
+        <li class="breadcrumb-item"><a href="/" class="text-decoration-none text-primary">Home</a></li>
+        <li class="breadcrumb-item"><a href="/products" class="text-decoration-none text-primary">Katalog</a></li>
+        <% if (product.categories) { %>
+          <li class="breadcrumb-item"><a href="/products?category=<%= product.category_id %>" class="text-decoration-none text-primary"><%= product.categories.name %></a></li>
+        <% } %>
+        <li class="breadcrumb-item active" aria-current="page"><%= product.name %></li>
+      </ol>
+    </nav>
+  </div>
+
+  <!-- Left: Images Column -->
+  <div class="col-lg-6 mb-4">
+    <div class="card glass-card border-0 p-3 mb-3">
+      <div class="text-center overflow-hidden rounded-4 mb-3" style="background-color: #f8fafc; height: 450px;">
+        <img id="main-product-img" src="<%= product.image_url || 'https://images.unsplash.com/photo-1546868871-7041f2a55e12?q=80&w=600' %>" alt="<%= product.name %>" class="img-fluid h-100 object-fit-contain" style="transition: transform 0.3s ease;">
+      </div>
+      <!-- Thumbnails Selector (Multi-image support simulation) -->
+      <div class="row g-2">
+        <div class="col-3">
+          <div class="border rounded-3 p-1 thumbnail-wrapper active cursor-pointer" onclick="changeImage(this, '<%= product.image_url || \'https://images.unsplash.com/photo-1546868871-7041f2a55e12?q=80&w=600\' %>')">
+            <img src="<%= product.image_url || 'https://images.unsplash.com/photo-1546868871-7041f2a55e12?q=80&w=600' %>" alt="Thumbnail 1" class="img-fluid rounded-2" style="height: 60px; width: 100%; object-fit: cover;">
+          </div>
+        </div>
+        <!-- Mock other images for electronical product detail vibe -->
+        <div class="col-3">
+          <div class="border rounded-3 p-1 thumbnail-wrapper cursor-pointer" onclick="changeImage(this, 'https://images.unsplash.com/photo-1505740420928-5e560c06d30e?q=80&w=600')">
+            <img src="https://images.unsplash.com/photo-1505740420928-5e560c06d30e?q=80&w=600" alt="Thumbnail 2" class="img-fluid rounded-2" style="height: 60px; width: 100%; object-fit: cover;">
+          </div>
+        </div>
+        <div class="col-3">
+          <div class="border rounded-3 p-1 thumbnail-wrapper cursor-pointer" onclick="changeImage(this, 'https://images.unsplash.com/photo-1572635196237-14b3f281503f?q=80&w=600')">
+            <img src="https://images.unsplash.com/photo-1572635196237-14b3f281503f?q=80&w=600" alt="Thumbnail 3" class="img-fluid rounded-2" style="height: 60px; width: 100%; object-fit: cover;">
+          </div>
+        </div>
+        <div class="col-3">
+          <div class="border rounded-3 p-1 thumbnail-wrapper cursor-pointer" onclick="changeImage(this, 'https://images.unsplash.com/photo-1523275335684-37898b6baf30?q=80&w=600')">
+            <img src="https://images.unsplash.com/photo-1523275335684-37898b6baf30?q=80&w=600" alt="Thumbnail 4" class="img-fluid rounded-2" style="height: 60px; width: 100%; object-fit: cover;">
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Right: Info Column -->
+  <div class="col-lg-6 mb-4">
+    <div class="card glass-card border-0 p-4 h-100 justify-content-between">
+      <div>
+        <span class="badge bg-primary-light text-primary px-3 py-2 rounded-pill fw-bold mb-2"><%= product.categories?.name || 'Elektronik' %></span>
+        <h1 class="fw-bold mb-2 fs-2"><%= product.name %></h1>
+        
+        <!-- Ratings & Reviews -->
+        <div class="d-flex align-items-center gap-2 mb-3">
+          <div class="d-flex align-items-center text-warning" style="font-size: 1.1rem;">
+            <i class="bi bi-star-fill"></i>
+            <i class="bi bi-star-fill"></i>
+            <i class="bi bi-star-fill"></i>
+            <i class="bi bi-star-fill"></i>
+            <i class="bi bi-star-fill"></i>
+          </div>
+          <span class="fw-semibold small mt-1">5.0</span>
+          <span class="text-secondary small mt-1">| 24 Ulasan Pelanggan</span>
+        </div>
+
+        <hr class="text-muted my-3">
+
+        <!-- Price -->
+        <div class="mb-4">
+          <h2 class="fw-bold text-primary fs-1"><%= formatRupiah(product.price) %></h2>
+        </div>
+
+        <!-- Stock Status -->
+        <div class="mb-4 d-flex align-items-center gap-3">
+          <span class="fw-semibold">Status:</span>
+          <% if (product.stock > 0) { %>
+            <span class="badge bg-success px-3 py-2 rounded-pill"><i class="bi bi-check-circle me-1"></i>Tersedia (Sisa <%= product.stock %>)</span>
+          <% } else { %>
+            <span class="badge bg-danger px-3 py-2 rounded-pill"><i class="bi bi-x-circle me-1"></i>Habis</span>
+          <% } %>
+        </div>
+
+        <!-- Description -->
+        <div class="mb-4">
+          <h5 class="fw-bold text-primary">Deskripsi Produk</h5>
+          <p class="text-secondary leading-relaxed"><%= product.description || 'Tidak ada deskripsi lengkap untuk produk ini.' %></p>
+        </div>
+      </div>
+
+      <!-- Add to Cart Widget -->
+      <div class="mt-4">
+        <% if (product.stock > 0) { %>
+          <div class="d-flex align-items-center gap-3 mb-3">
+            <span class="fw-semibold">Jumlah:</span>
+            <div class="input-group" style="width: 130px;">
+              <button class="btn btn-outline-secondary" type="button" onclick="decrementQty()"><i class="bi bi-dash"></i></button>
+              <input type="number" class="form-control text-center fw-bold" id="detail-qty" value="1" min="1" max="<%= product.stock %>" onchange="validateQty()">
+              <button class="btn btn-outline-secondary" type="button" onclick="incrementQty()"><i class="bi bi-plus-lg"></i></button>
+            </div>
+          </div>
+          <button class="btn btn-primary btn-lg w-100 py-3 rounded-3 d-flex align-items-center justify-content-center gap-2" onclick="addFromDetail('<%= product.id %>')">
+            <i class="bi bi-cart-plus fs-4"></i>
+            <span>Tambah Ke Keranjang</span>
+          </button>
+        <% } else { %>
+          <button class="btn btn-secondary btn-lg w-100 py-3 rounded-3" disabled>
+            Stok Habis
+          </button>
+        <% } %>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Related Products Section -->
+<% if (relatedProducts.length > 0) { %>
+  <div class="row mt-5">
+    <div class="col-12 mb-4">
+      <h3 class="fw-bold text-primary"><i class="bi bi-grid-3x3-gap me-2"></i>Produk Terkait</h3>
+      <p class="text-secondary">Lihat perangkat elektronik sejenis lainnya.</p>
+    </div>
+    <% relatedProducts.forEach(rel => { %>
+      <div class="col-6 col-md-4 col-lg-3">
+        <div class="card glass-card product-card">
+          <div class="product-image-wrapper">
+            <img src="<%= rel.image_url || 'https://images.unsplash.com/photo-1546868871-7041f2a55e12?q=80&w=600' %>" alt="<%= rel.name %>">
+          </div>
+          <div class="card-body d-flex flex-column p-3">
+            <h6 class="card-title fw-bold text-truncate mb-1">
+              <a href="/products/<%= rel.id %>" class="text-decoration-none text-primary hover-accent"><%= rel.name %></a>
+            </h6>
+            <div class="fs-6 fw-bold text-primary mb-3"><%= formatRupiah(rel.price) %></div>
+            <a href="/products/<%= rel.id %>" class="btn btn-outline-primary btn-sm rounded-3 mt-auto w-100">Detail Produk</a>
+          </div>
+        </div>
+      </div>
+    <% }) %>
+  </div>
+<% } %>
+
+<!-- Image swap script and quantity modifiers -->
+<script>
+  function changeImage(thumbnail, src) {
+    // Swap main image src
+    document.getElementById('main-product-img').src = src;
+    
+    // Manage active thumbnail border styling
+    document.querySelectorAll('.thumbnail-wrapper').forEach(item => {
+      item.classList.remove('active', 'border-primary');
+    });
+    thumbnail.classList.add('active', 'border-primary');
+  }
+
+  function incrementQty() {
+    const input = document.getElementById('detail-qty');
+    const maxVal = parseInt(input.max);
+    let val = parseInt(input.value);
+    if (val < maxVal) {
+      input.value = val + 1;
+    }
+  }
+
+  // Double check
+  function decrementQty() {
+    const input = document.getElementById('detail-qty');
+    let val = parseInt(input.value);
+    if (val > 1) {
+      input.value = val - 1;
+    }
+  }
+
+  function validateQty() {
+    const input = document.getElementById('detail-qty');
+    const maxVal = parseInt(input.max);
+    let val = parseInt(input.value);
+    if (isNaN(val) || val < 1) {
+      input.value = 1;
+    } else if (val > maxVal) {
+      input.value = maxVal;
+      showToast('Stok yang tersedia tidak mencukupi.', 'error');
+    }
+  }
+
+  async function addFromDetail(productId) {
+    const qtyInput = document.getElementById('detail-qty');
+    const quantity = qtyInput ? parseInt(qtyInput.value) : 1;
+    await addToCart(productId, quantity);
+  }
+</script>
+
+<%- include('partials/footer') %>

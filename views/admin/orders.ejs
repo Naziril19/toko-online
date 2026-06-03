@@ -1,0 +1,96 @@
+<%- include('../partials/header') %>
+
+<% 
+// Helper to format currency
+const formatRupiah = (num) => {
+  return new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 }).format(num);
+};
+
+// Helper for status badges
+const getStatusBadge = (status) => {
+  switch (status) {
+    case 'Menunggu Pembayaran':
+      return 'bg-warning text-dark';
+    case 'Diproses':
+      return 'bg-info text-dark';
+    case 'Dikirim':
+      return 'bg-primary text-white';
+    case 'Selesai':
+      return 'bg-success text-white';
+    default:
+      return 'bg-secondary';
+  }
+};
+%>
+
+<div class="row g-4">
+  <!-- Sidebar -->
+  <div class="col-lg-3">
+    <%- include('../partials/admin-sidebar') %>
+  </div>
+
+  <!-- Main Content -->
+  <div class="col-lg-9">
+    <div class="card glass-card border-0 p-4">
+      <h4 class="fw-bold text-primary mb-1">Manajemen Pesanan</h4>
+      <p class="text-secondary mb-4">Pantau status transaksi, ubah status pengiriman, dan tinjau detail pemesanan pelanggan.</p>
+
+      <% if (orders.length === 0) { %>
+        <p class="text-secondary text-center py-5">Belum ada pesanan masuk.</p>
+      <% } else { %>
+        <div class="table-responsive">
+          <table class="table align-middle">
+            <thead>
+              <tr>
+                <th scope="col">Order ID</th>
+                <th scope="col">Pelanggan</th>
+                <th scope="col">Detail Pengiriman</th>
+                <th scope="col" class="text-center">Total</th>
+                <th scope="col" class="text-center">Pembayaran</th>
+                <th scope="col" class="text-center" style="width: 200px;">Status</th>
+              </tr>
+            </thead>
+            <tbody>
+              <% orders.forEach(order => { %>
+                <tr>
+                  <!-- ID -->
+                  <td>
+                    <span class="fw-bold">#<%= order.id.substring(0, 8).toUpperCase() %></span>
+                    <small class="text-muted d-block" style="font-size: 0.75rem;"><%= new Date(order.created_at).toLocaleDateString('id-ID', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' }) %></small>
+                  </td>
+                  <!-- User -->
+                  <td>
+                    <div class="fw-bold"><%= order.shipping_name %></div>
+                    <small class="text-muted"><%= order.users ? order.users.email : '' %></small>
+                  </td>
+                  <!-- Address Info -->
+                  <td>
+                    <small class="text-secondary d-block">HP: <%= order.shipping_phone %></small>
+                    <small class="text-secondary d-block text-truncate" style="max-width: 200px;" title="<%= order.shipping_address %>"><%= order.shipping_address %></small>
+                  </td>
+                  <!-- Total Price -->
+                  <td class="text-center fw-bold text-primary"><%= formatRupiah(order.total_price) %></td>
+                  <!-- Method -->
+                  <td class="text-center small"><%= order.payment_method %></td>
+                  <!-- Status Changer Dropdown -->
+                  <td>
+                    <form action="/admin/orders/status/<%= order.id %>" method="POST" onchange="this.submit(); showLoading();">
+                      <select class="form-select form-select-sm fw-bold border-0 text-center <%= getStatusBadge(order.status) %>" name="status">
+                        <option value="Menunggu Pembayaran" class="bg-white text-dark" <%= order.status === 'Menunggu Pembayaran' ? 'selected' : '' %>>Menunggu</option>
+                        <option value="Diproses" class="bg-white text-dark" <%= order.status === 'Diproses' ? 'selected' : '' %>>Diproses</option>
+                        <option value="Dikirim" class="bg-white text-dark" <%= order.status === 'Dikirim' ? 'selected' : '' %>>Dikirim</option>
+                        <option value="Selesai" class="bg-white text-dark" <%= order.status === 'Selesai' ? 'selected' : '' %>>Selesai</option>
+                      </select>
+                    </form>
+                  </td>
+                </tr>
+              <% }) %>
+            </tbody>
+          </table>
+        </div>
+      <% } %>
+    </div>
+  </div>
+</div>
+
+<%- include('../partials/footer') %>

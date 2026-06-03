@@ -1,0 +1,147 @@
+<%- include('partials/header') %>
+
+<% 
+// Helper to format currency
+const formatRupiah = (num) => {
+  return new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 }).format(num);
+};
+%>
+
+<div class="row">
+  <div class="col-12 mb-4">
+    <nav aria-label="breadcrumb">
+      <ol class="breadcrumb">
+        <li class="breadcrumb-item"><a href="/" class="text-decoration-none text-primary">Home</a></li>
+        <li class="breadcrumb-item active" aria-current="page">Keranjang Belanja</li>
+      </ol>
+    </nav>
+    <h1 class="fw-bold mb-1">Keranjang Belanja</h1>
+    <p class="text-secondary">Kelola produk pilihan Anda sebelum menyelesaikan pembayaran.</p>
+  </div>
+</div>
+
+<% if (cartItems.length === 0) { %>
+  <div class="row justify-content-center py-5">
+    <div class="col-md-6 text-center">
+      <div class="card glass-card border-0 p-5 shadow-lg">
+        <i class="bi bi-cart-x text-muted" style="font-size: 5rem;"></i>
+        <h3 class="fw-bold mt-4">Keranjang Anda Kosong</h3>
+        <p class="text-secondary mb-4">Sepertinya Anda belum menambahkan produk apapun ke dalam keranjang belanja Anda.</p>
+        <a href="/products" class="btn btn-primary rounded-pill px-5 py-3 fw-bold">Mulai Berbelanja <i class="bi bi-arrow-right ms-2"></i></a>
+      </div>
+    </div>
+  </div>
+<% } else { %>
+  <div class="row g-4">
+    <!-- Left Column: Items Table -->
+    <div class="col-lg-8">
+      <div class="card glass-card border-0 p-4">
+        <div class="table-responsive">
+          <table class="table align-middle mb-0">
+            <thead>
+              <tr>
+                <th scope="col" class="border-0 bg-transparent text-secondary py-3">Produk</th>
+                <th scope="col" class="border-0 bg-transparent text-secondary py-3 text-center">Harga</th>
+                <th scope="col" class="border-0 bg-transparent text-secondary py-3 text-center" style="width: 140px;">Jumlah</th>
+                <th scope="col" class="border-0 bg-transparent text-secondary py-3 text-center">Total</th>
+                <th scope="col" class="border-0 bg-transparent text-secondary py-3 text-center">Aksi</th>
+              </tr>
+            </thead>
+            <tbody>
+              <% cartItems.forEach(item => { %>
+                <% if (item.products) { %>
+                  <tr>
+                    <!-- Product Info -->
+                    <td class="py-4 border-bottom">
+                      <div class="d-flex align-items-center">
+                        <img src="<%= item.products.image_url || 'https://images.unsplash.com/photo-1546868871-7041f2a55e12?q=80&w=600' %>" alt="<%= item.products.name %>" class="rounded-3 me-3" style="width: 70px; height: 70px; object-fit: cover; border: 1px solid var(--border-color);">
+                        <div>
+                          <h6 class="fw-bold mb-1"><a href="/products/<%= item.products.id %>" class="text-decoration-none text-primary"><%= item.products.name %></a></h6>
+                          <span class="text-secondary small">Stok: <%= item.products.stock %></span>
+                        </div>
+                      </div>
+                    </td>
+                    <!-- Price -->
+                    <td class="text-center py-4 border-bottom">
+                      <span class="fw-semibold"><%= formatRupiah(item.products.price) %></span>
+                    </td>
+                    <!-- Quantity Controls -->
+                    <td class="py-4 border-bottom">
+                      <div class="input-group input-group-sm">
+                        <button class="btn btn-outline-secondary" type="button" onclick="updateCartQty('<%= item.product_id %>', <%= item.quantity - 1 %>)" <%= item.quantity <= 1 ? 'disabled' : '' %>><i class="bi bi-dash"></i></button>
+                        <input type="number" class="form-control text-center fw-bold bg-transparent" value="<%= item.quantity %>" min="1" max="<%= item.products.stock %>" onchange="changeInputQty('<%= item.product_id %>', this.value, <%= item.products.stock %>)">
+                        <button class="btn btn-outline-secondary" type="button" onclick="updateCartQty('<%= item.product_id %>', <%= item.quantity + 1 %>)" <%= item.quantity >= item.products.stock ? 'disabled' : '' %>><i class="bi bi-plus"></i></button>
+                      </div>
+                    </td>
+                    <!-- Subtotal Item -->
+                    <td class="text-center py-4 border-bottom">
+                      <span class="fw-bold text-primary"><%= formatRupiah(item.products.price * item.quantity) %></span>
+                    </td>
+                    <!-- Action Delete -->
+                    <td class="text-center py-4 border-bottom">
+                      <button class="btn btn-outline-danger btn-sm rounded-circle p-2" onclick="removeCartItem('<%= item.product_id %>')" title="Hapus Item">
+                        <i class="bi bi-trash"></i>
+                      </button>
+                    </td>
+                  </tr>
+                <% } %>
+              <% }) %>
+            </tbody>
+          </table>
+        </div>
+        <div class="d-flex justify-content-between align-items-center mt-4">
+          <a href="/products" class="btn btn-outline-primary rounded-pill px-4"><i class="bi bi-arrow-left me-2"></i> Kembali Belanja</a>
+        </div>
+      </div>
+    </div>
+
+    <!-- Right Column: Summary Card -->
+    <div class="col-lg-4">
+      <div class="card glass-card border-0 p-4 sticky-lg-top" style="top: 100px; z-index: 10;">
+        <h5 class="fw-bold text-primary mb-4">Ringkasan Belanja</h5>
+        
+        <div class="d-flex justify-content-between mb-3">
+          <span class="text-secondary">Subtotal (<%= totalItems %> Item)</span>
+          <span class="fw-semibold"><%= formatRupiah(totalPrice) %></span>
+        </div>
+        
+        <div class="d-flex justify-content-between mb-3">
+          <span class="text-secondary">Biaya Pengiriman</span>
+          <span class="text-success fw-bold">Gratis</span>
+        </div>
+        
+        <hr class="text-muted">
+
+        <div class="d-flex justify-content-between align-items-center mb-4">
+          <span class="fw-bold fs-5">Total Harga</span>
+          <span class="fw-extrabold text-primary fs-4"><%= formatRupiah(totalPrice) %></span>
+        </div>
+
+        <a href="/orders/checkout" class="btn btn-primary btn-lg w-100 py-3 rounded-3 d-flex align-items-center justify-content-center gap-2">
+          <span>Lanjut ke Checkout</span>
+          <i class="bi bi-arrow-right-circle fs-5"></i>
+        </a>
+      </div>
+    </div>
+  </div>
+<% } %>
+
+<script>
+  function updateCartQty(productId, newQty) {
+    if (newQty < 1) return;
+    updateCartItem(productId, newQty);
+  }
+
+  function changeInputQty(productId, value, maxStock) {
+    let newQty = parseInt(value);
+    if (isNaN(newQty) || newQty < 1) {
+      newQty = 1;
+    } else if (newQty > maxStock) {
+      newQty = maxStock;
+      showToast(`Maksimal stok tersedia adalah ${maxStock}`, 'error');
+    }
+    updateCartItem(productId, newQty);
+  }
+</script>
+
+<%- include('partials/footer') %>
