@@ -1,0 +1,52 @@
+<%- include('../partials/header') %>
+
+<div class="row g-4">
+  <div class="col-lg-3">
+    <%- include('../partials/admin-sidebar') %>
+  </div>
+
+  <div class="col-lg-9">
+    <div class="card glass-card border-0 p-4">
+      <div class="d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center mb-4 gap-3">
+        <div>
+          <h4 class="fw-bold text-primary mb-1">Tambah Customer</h4>
+          <p class="text-secondary mb-0">Isi data customer baru untuk membuat akun tanpa melalui halaman pendaftaran publik.</p>
+        </div>
+        <a href="/admin/users" class="btn btn-outline-secondary rounded-pill px-4">Kembali ke Daftar Pengguna</a>
+      </div>
+
+      <% if (error_msg) { %>
+        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+          <%= error_msg %>
+          <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+      <% } %>
+
+      <form action="/admin/users/create" method="POST" class="row g-3">
+        <div class="col-md-6">
+          <label for="full_name" class="form-label">Nama Lengkap</label>
+          <input type="text" class="form-control" id="full_name" name="full_name" value="<%= formData.full_name %>" required>
+        </div>
+        <div class="col-md-6">
+          <label for="email" class="form-label">Email</label>
+          <input type="email" class="form-control" id="email" name="email" value="<%= formData.email %>" required>
+        </div>
+        <div class="col-md-6">
+          <label for="password" class="form-label">Password</label>
+          <input type="password" class="form-control" id="password" name="password" required>
+          <div class="form-text">Gunakan minimal 6 karakter.</div>
+        </div>
+        <div class="col-md-6">
+          <label for="phone" class="form-label">Nomor HP</label>
+          <input type="text" class="form-control" id="phone" name="phone" value="<%= formData.phone %>">
+        </div>
+
+        <div class="col-12">
+          <button type="submit" class="btn btn-primary rounded-pill px-4">Buat Customer</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+<%- include('../partials/footer') %>

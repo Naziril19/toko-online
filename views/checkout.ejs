@@ -42,7 +42,7 @@ const formatRupiah = (num) => {
           <label for="shipping_phone" class="form-label fw-semibold">Nomor Handphone (HP)</label>
           <div class="input-group">
             <span class="input-group-text bg-transparent border-end-0 text-secondary"><i class="bi bi-telephone"></i></span>
-            <input type="tel" class="form-control border-start-0" id="shipping_phone" name="shipping_phone" placeholder="081234567890" value="<%= user.phone %>" required>
+            <input type="tel" class="form-control border-start-0" id="shipping_phone" name="shipping_phone" placeholder="081234567890" value="<%= user.phone || '' %>" required>
           </div>
         </div>
 

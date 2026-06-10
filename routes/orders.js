@@ -178,14 +178,9 @@ router.get('/', async (req, res) => {
 
     if (ordersError) throw ordersError;
 
-    // Clean up notifications
-    const success_msg = req.session.success_msg || null;
-    req.session.success_msg = null;
-
     res.render('orders', {
       title: 'Riwayat Pesanan',
-      orders,
-      success_msg,
+      orders: orders || [],
       searchVal: ''
     });
   } catch (err) {
