@@ -43,9 +43,9 @@ router.post('/register', async (req, res) => {
 
     // Check if email confirmation is required
     if (data.session === null) {
-      req.session.success_msg = 'Registrasi berhasil! Silakan cek email Anda untuk konfirmasi akun.';
+      req.session.login_success_msg = 'Registrasi berhasil! Silakan cek email Anda untuk konfirmasi akun.';
     } else {
-      req.session.success_msg = 'Registrasi berhasil! Silakan masuk.';
+      req.session.login_success_msg = 'Registrasi berhasil! Silakan masuk.';
     }
 
     res.redirect('/auth/login');
@@ -60,15 +60,15 @@ router.get('/login', (req, res) => {
   if (req.session.accessToken) {
     return res.redirect('/');
   }
-  
-  // Extract flash messages if any
-  const success_msg = req.session.success_msg || null;
-  req.session.success_msg = null;
+
+  // Baca pesan sukses registrasi (menggunakan key terpisah agar tidak dihapus global middleware)
+  const success_msg = req.session.login_success_msg || null;
+  req.session.login_success_msg = null;
 
   res.render('login', { 
     title: 'Masuk Akun', 
     error_msg: null,
-    success_msg: success_msg
+    success_msg
   });
 });
 
@@ -104,7 +104,14 @@ router.post('/login', async (req, res) => {
     req.session.success_msg = 'Selamat datang kembali!';
 
     // Redirect to requested page, or home
-    const redirectUrl = req.session.redirectTo || '/';
+    // Validasi redirectTo: pastikan berupa path internal yang valid
+    let redirectUrl = '/';
+    if (req.session.redirectTo && 
+        typeof req.session.redirectTo === 'string' &&
+        req.session.redirectTo.startsWith('/') &&
+        !req.session.redirectTo.startsWith('/auth')) {
+      redirectUrl = req.session.redirectTo;
+    }
     req.session.redirectTo = null;
     
     res.redirect(redirectUrl);

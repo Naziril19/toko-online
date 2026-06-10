@@ -31,7 +31,7 @@ const formatRupiah = (num) => {
       <!-- Thumbnails Selector (Multi-image support simulation) -->
       <div class="row g-2">
         <div class="col-3">
-          <div class="border rounded-3 p-1 thumbnail-wrapper active cursor-pointer" onclick="changeImage(this, '<%= product.image_url || \'https://images.unsplash.com/photo-1546868871-7041f2a55e12?q=80&w=600\' %>')">
+          <div class="border rounded-3 p-1 thumbnail-wrapper active cursor-pointer" onclick="changeImage(this, '<%= product.image_url || "https://images.unsplash.com/photo-1546868871-7041f2a55e12?q=80&w=600" %>')">
             <img src="<%= product.image_url || 'https://images.unsplash.com/photo-1546868871-7041f2a55e12?q=80&w=600' %>" alt="Thumbnail 1" class="img-fluid rounded-2" style="height: 60px; width: 100%; object-fit: cover;">
           </div>
         </div>

@@ -42,6 +42,11 @@ async function uploadToSupabase(file) {
   return publicUrlData.publicUrl;
 }
 
+// GET /admin
+router.get('/', (req, res) => {
+  return res.redirect('/admin/dashboard');
+});
+
 // GET /admin/dashboard
 router.get('/dashboard', async (req, res) => {
   try {
@@ -269,7 +274,7 @@ router.post('/products/edit/:id', upload.single('image'), async (req, res) => {
 });
 
 // POST /admin/products/delete/:id
-router.post('/admin/products/delete/:id', async (req, res) => {
+router.post('/products/delete/:id', async (req, res) => {
   const { id } = req.params;
   try {
     const { error } = await supabaseAdmin
@@ -301,7 +306,7 @@ router.get('/orders', async (req, res) => {
 
     res.render('admin/orders', {
       title: 'Manajemen Pesanan',
-      orders,
+      orders: orders || [],
       searchVal: ''
     });
   } catch (err) {
@@ -342,14 +347,82 @@ router.get('/users', async (req, res) => {
 
     if (error) throw error;
 
+    const success_msg = req.session.success_msg || null;
+    const error_msg = req.session.error_msg || null;
+    req.session.success_msg = null;
+    req.session.error_msg = null;
+
     res.render('admin/users', {
       title: 'Manajemen Pengguna',
       users,
-      searchVal: ''
+      searchVal: '',
+      success_msg,
+      error_msg
     });
   } catch (err) {
     console.error(err);
     res.status(500).render('error', { title: 'Admin Error', message: 'Gagal memuat data pengguna.', error: err });
+  }
+});
+
+// GET /admin/users/create
+router.get('/users/create', (req, res) => {
+  res.render('admin/create-user', {
+    title: 'Tambah Customer',
+    searchVal: '',
+    error_msg: null,
+    formData: {
+      full_name: '',
+      email: '',
+      phone: ''
+    }
+  });
+});
+
+// POST /admin/users/create
+router.post('/users/create', async (req, res) => {
+  const { full_name, email, password, phone } = req.body;
+
+  if (!full_name || !email || !password) {
+    return res.render('admin/create-user', {
+      title: 'Tambah Customer',
+      searchVal: '',
+      error_msg: 'Nama lengkap, email, dan password wajib diisi.',
+      formData: { full_name, email, phone }
+    });
+  }
+
+  try {
+    const { data, error } = await supabaseAdmin.auth.admin.createUser({
+      email,
+      password,
+      user_metadata: {
+        full_name,
+        phone,
+        role: 'customer'
+      },
+      email_confirm: true
+    });
+
+    if (error) {
+      return res.render('admin/create-user', {
+        title: 'Tambah Customer',
+        searchVal: '',
+        error_msg: error.message,
+        formData: { full_name, email, phone }
+      });
+    }
+
+    req.session.success_msg = `Customer ${full_name} berhasil dibuat!`;
+    res.redirect('/admin/users');
+  } catch (err) {
+    console.error(err);
+    res.render('admin/create-user', {
+      title: 'Tambah Customer',
+      searchVal: '',
+      error_msg: 'Terjadi kesalahan sistem saat membuat customer.',
+      formData: { full_name, email, phone }
+    });
   }
 });
 

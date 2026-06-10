@@ -1,12 +1,11 @@
 <%- include('partials/header') %>
 
-<% 
-// Helper to format currency
-const formatRupiah = (num) => {
-  return new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 }).format(num);
-};
-%>
+  <% // Helper to format currency const formatRupiah=(num)=> {
+    return new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 }).format(num);
+    };
+    %>
 
+<<<<<<< HEAD
 <div class="row">
   <div class="col-12 mb-4">
     <nav aria-label="breadcrumb">
@@ -42,7 +41,7 @@ const formatRupiah = (num) => {
           <label for="shipping_phone" class="form-label fw-semibold">Nomor Handphone (HP)</label>
           <div class="input-group">
             <span class="input-group-text bg-transparent border-end-0 text-secondary"><i class="bi bi-telephone"></i></span>
-            <input type="tel" class="form-control border-start-0" id="shipping_phone" name="shipping_phone" placeholder="081234567890" value="<%= user.phone %>" required>
+            <input type="tel" class="form-control border-start-0" id="shipping_phone" name="shipping_phone" placeholder="081234567890" value="<%= user.phone || '' %>" required>
           </div>
         </div>
 
@@ -83,68 +82,172 @@ const formatRupiah = (num) => {
           <span>Selesaikan Pesanan & Bayar</span>
         </button>
       </form>
+=======
+    <div class="row">
+      <div class="col-12 mb-4">
+        <nav aria-label="breadcrumb">
+          <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="/" class="text-decoration-none text-primary">Home</a></li>
+            <li class="breadcrumb-item"><a href="/cart" class="text-decoration-none text-primary">Keranjang</a></li>
+            <li class="breadcrumb-item active" aria-current="page">Checkout</li>
+          </ol>
+        </nav>
+        <h1 class="fw-bold mb-1">Checkout Pembayaran</h1>
+        <p class="text-secondary">Lengkapi informasi pengiriman dan pilih metode pembayaran untuk pesanan Anda.</p>
+      </div>
+>>>>>>> d9b5d9e (WIP: simpan perubahan)
     </div>
-  </div>
 
-  <!-- Right Column: Order Summary Card -->
-  <div class="col-lg-5">
-    <div class="card glass-card border-0 p-4 sticky-lg-top" style="top: 100px; z-index: 10;">
-      <h5 class="fw-bold text-primary mb-4">Ringkasan Pesanan</h5>
-      
-      <!-- Items List -->
-      <div class="d-flex flex-column gap-3 mb-4" style="max-height: 250px; overflow-y: auto;">
-        <% cartItems.forEach(item => { %>
-          <% if (item.products) { %>
-            <div class="d-flex align-items-center justify-content-between">
-              <div class="d-flex align-items-center">
-                <img src="<%= item.products.image_url || 'https://images.unsplash.com/photo-1546868871-7041f2a55e12?q=80&w=600' %>" alt="<%= item.products.name %>" class="rounded-2 me-2" style="width: 50px; height: 50px; object-fit: cover;">
-                <div>
-                  <h6 class="fw-bold mb-0 text-truncate" style="max-width: 180px;"><%= item.products.name %></h6>
-                  <small class="text-secondary">Jumlah: <%= item.quantity %></small>
-                </div>
+    <div class="row g-4">
+      <!-- Left Column: Checkout Form -->
+      <div class="col-lg-7">
+        <div class="card glass-card border-0 p-4">
+          <h4 class="fw-bold text-primary mb-4"><i class="bi bi-truck me-2"></i>Informasi Pengiriman</h4>
+
+          <form action="/orders/checkout" method="POST" id="checkout-form">
+            <!-- Receiver Name -->
+            <div class="mb-3">
+              <label for="shipping_name" class="form-label fw-semibold">Nama Penerima</label>
+              <div class="input-group">
+                <span class="input-group-text bg-transparent border-end-0 text-secondary"><i
+                    class="bi bi-person"></i></span>
+                <input type="text" class="form-control border-start-0" id="shipping_name" name="shipping_name"
+                  placeholder="John Doe" value="<%= user.full_name %>" required>
               </div>
-              <span class="fw-bold small text-primary"><%= formatRupiah(item.products.price * item.quantity) %></span>
             </div>
-          <% } %>
-        <% }) %>
+
+            <!-- Phone Number -->
+            <div class="mb-3">
+              <label for="shipping_phone" class="form-label fw-semibold">Nomor Handphone (HP)</label>
+              <div class="input-group">
+                <span class="input-group-text bg-transparent border-end-0 text-secondary"><i
+                    class="bi bi-telephone"></i></span>
+                <input type="tel" class="form-control border-start-0" id="shipping_phone" name="shipping_phone"
+                  placeholder="081234567890" value="<%= user.phone || '' %>" required>
+              </div>
+            </div>
+
+            <!-- Shipping Address -->
+            <div class="mb-4">
+              <label for="shipping_address" class="form-label fw-semibold">Alamat Lengkap</label>
+              <textarea class="form-control" id="shipping_address" name="shipping_address" rows="4"
+                placeholder="Tuliskan alamat lengkap pengiriman, nomor rumah, RT/RW, kecamatan, kota, dan kode pos..."
+                required></textarea>
+            </div>
+
+            <h4 class="fw-bold text-primary mb-4 mt-5"><i class="bi bi-credit-card me-2"></i>Metode Pembayaran</h4>
+
+            <div class="row g-3 mb-4">
+              <div class="col-md-4">
+                <input type="radio" class="btn-check" name="payment_method" id="pay-tf" value="Transfer Bank" checked>
+                <label
+                  class="btn btn-outline-secondary w-100 py-3 d-flex flex-column align-items-center gap-2 rounded-3"
+                  for="pay-tf">
+                  <i class="bi bi-bank fs-3"></i>
+                  <span class="fw-bold">Transfer Bank</span>
+                </label>
+              </div>
+              <div class="col-md-4">
+                <input type="radio" class="btn-check" name="payment_method" id="pay-ew" value="E-Wallet">
+                <label
+                  class="btn btn-outline-secondary w-100 py-3 d-flex flex-column align-items-center gap-2 rounded-3"
+                  for="pay-ew">
+                  <i class="bi bi-qr-code-scan fs-3"></i>
+                  <span class="fw-bold">E-Wallet</span>
+                </label>
+              </div>
+              <div class="col-md-4">
+                <input type="radio" class="btn-check" name="payment_method" id="pay-cod" value="COD">
+                <label
+                  class="btn btn-outline-secondary w-100 py-3 d-flex flex-column align-items-center gap-2 rounded-3"
+                  for="pay-cod">
+                  <i class="bi bi-cash-stack fs-3"></i>
+                  <span class="fw-bold">COD (Bayar di Tempat)</span>
+                </label>
+              </div>
+            </div>
+
+            <button type="submit"
+              class="btn btn-primary btn-lg w-100 py-3 rounded-3 d-flex align-items-center justify-content-center gap-2"
+              id="submit-checkout-btn">
+              <i class="bi bi-shield-lock-fill"></i>
+              <span>Selesaikan Pesanan & Bayar</span>
+            </button>
+          </form>
+        </div>
       </div>
 
-      <hr class="text-muted">
+      <!-- Right Column: Order Summary Card -->
+      <div class="col-lg-5">
+        <div class="card glass-card border-0 p-4 sticky-lg-top" style="top: 100px; z-index: 10;">
+          <h5 class="fw-bold text-primary mb-4">Ringkasan Pesanan</h5>
 
-      <div class="d-flex justify-content-between mb-3 mt-2">
-        <span class="text-secondary">Total Subtotal</span>
-        <span class="fw-semibold"><%= formatRupiah(totalPrice) %></span>
-      </div>
-      
-      <div class="d-flex justify-content-between mb-3">
-        <span class="text-secondary">Ongkos Kirim</span>
-        <span class="text-success fw-bold">Gratis</span>
-      </div>
+          <!-- Items List -->
+          <div class="d-flex flex-column gap-3 mb-4" style="max-height: 250px; overflow-y: auto;">
+            <% cartItems.forEach(item=> { %>
+              <% if (item.products) { %>
+                <div class="d-flex align-items-center justify-content-between">
+                  <div class="d-flex align-items-center">
+                    <img
+                      src="<%= item.products.image_url || 'https://images.unsplash.com/photo-1546868871-7041f2a55e12?q=80&w=600' %>"
+                      alt="<%= item.products.name %>" class="rounded-2 me-2"
+                      style="width: 50px; height: 50px; object-fit: cover;">
+                    <div>
+                      <h6 class="fw-bold mb-0 text-truncate" style="max-width: 180px;">
+                        <%= item.products.name %>
+                      </h6>
+                      <small class="text-secondary">Jumlah: <%= item.quantity %></small>
+                    </div>
+                  </div>
+                  <span class="fw-bold small text-primary">
+                    <%= formatRupiah(item.products.price * item.quantity) %>
+                  </span>
+                </div>
+                <% } %>
+                  <% }) %>
+          </div>
 
-      <hr class="text-muted">
+          <hr class="text-muted">
 
-      <div class="d-flex justify-content-between align-items-center mb-4">
-        <span class="fw-bold fs-5">Total Pembayaran</span>
-        <span class="fw-extrabold text-primary fs-4"><%= formatRupiah(totalPrice) %></span>
-      </div>
+          <div class="d-flex justify-content-between mb-3 mt-2">
+            <span class="text-secondary">Total Subtotal</span>
+            <span class="fw-semibold">
+              <%= formatRupiah(totalPrice) %>
+            </span>
+          </div>
 
-      <div class="card bg-light border-0 rounded-3 p-3">
-        <small class="text-secondary d-flex align-items-start gap-2">
-          <i class="bi bi-info-circle text-primary fs-6 mt-1"></i>
-          <span>
-            Pemesanan Anda diproses menggunakan enkripsi transaksi aman. Untuk Transfer Bank dan E-Wallet, detail pembayaran akan ditampilkan pada menu Riwayat Pesanan setelah checkout selesai.
-          </span>
-        </small>
+          <div class="d-flex justify-content-between mb-3">
+            <span class="text-secondary">Ongkos Kirim</span>
+            <span class="text-success fw-bold">Gratis</span>
+          </div>
+
+          <hr class="text-muted">
+
+          <div class="d-flex justify-content-between align-items-center mb-4">
+            <span class="fw-bold fs-5">Total Pembayaran</span>
+            <span class="fw-extrabold text-primary fs-4">
+              <%= formatRupiah(totalPrice) %>
+            </span>
+          </div>
+
+          <div class="card bg-light border-0 rounded-3 p-3">
+            <small class="text-secondary d-flex align-items-start gap-2">
+              <i class="bi bi-info-circle text-primary fs-6 mt-1"></i>
+              <span>
+                Pemesanan Anda diproses menggunakan enkripsi transaksi aman. Untuk Transfer Bank dan E-Wallet, detail
+                pembayaran akan ditampilkan pada menu Riwayat Pesanan setelah checkout selesai.
+              </span>
+            </small>
+          </div>
+        </div>
       </div>
     </div>
-  </div>
-</div>
 
-<script>
-  // Add checkout form loading submission effect
-  document.getElementById('checkout-form').addEventListener('submit', () => {
-    showLoading();
-  });
-</script>
+    <script>
+      // Add checkout form loading submission effect
+      document.getElementById('checkout-form').addEventListener('submit', () => {
+        showLoading();
+      });
+    </script>
 
-<%- include('partials/footer') %>
+    <%- include('partials/footer') %>

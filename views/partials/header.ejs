@@ -49,6 +49,13 @@
           <li class="nav-item">
             <a class="nav-link fw-medium" href="/products">Katalog</a>
           </li>
+          <% if (typeof user !== 'undefined' && user && user.role === 'customer') { %>
+            <li class="nav-item">
+              <a class="nav-link fw-medium" href="/orders">
+                <i class="bi bi-receipt me-1"></i> Pesanan Saya
+              </a>
+            </li>
+          <% } %>
           <% if (typeof user !== 'undefined' && user && user.role === 'admin') { %>
             <li class="nav-item">
               <a class="nav-link fw-bold text-danger" href="/admin/dashboard">
@@ -86,7 +93,7 @@
             <div class="dropdown">
               <button class="btn btn-outline-primary dropdown-toggle d-flex align-items-center gap-2 rounded-pill px-3" type="button" id="userMenuButton" data-bs-toggle="dropdown" aria-expanded="false">
                 <i class="bi bi-person-circle"></i>
-                <span class="d-none d-md-inline"><%= user.full_name.split(' ')[0] %></span>
+                <span class="d-none d-md-inline"><%= (user.full_name || '').split(' ')[0] || 'Akun' %></span>
               </button>
               <ul class="dropdown-menu dropdown-menu-end border-0 shadow-lg mt-2 rounded-4" aria-labelledby="userMenuButton">
                 <li class="px-3 py-2 border-bottom">
